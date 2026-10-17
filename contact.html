@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contact · Window Safar</title>
+<meta name="description" content="Get in touch with Window Safar: ideas for new routes, footage suggestions, corrections and partnerships.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="pages.css">
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "yykndo06mx");
+</script>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Window Safar">
+<meta property="og:title" content="Contact · Window Safar">
+<meta property="og:description" content="Shimla hills, Konkan rain, Jaisalmer sand. Real window footage, live weather, chai on your table and a stamp book to fill.">
+<meta property="og:url" content="https://windowsafar.com/contact.html">
+<meta property="og:image" content="https://windowsafar.com/photos/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Window Safar sign over a wall of train-journey photos">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://windowsafar.com/photos/og-image.jpg">
+<link rel="canonical" href="https://windowsafar.com/contact.html">
+</head><body>
+<header class="top"><div class="in">
+  <a class="sign" href="./" aria-label="Window Safar home"><small>विंडो सफ़र</small>WINDOW SAFAR</a>
+  <nav aria-label="Site">
+    <a href="./">Ride</a><a href="about.html">About</a><a href="contact.html" aria-current="page">Contact</a><a href="privacy.html">Privacy</a><a href="disclosure.html">Disclosure</a><a href="login.html">Sign in</a>
+  </nav>
+</div></header>
+<main>
+  <span class="eyebrow">Contact</span>
+  <h1>Say hello</h1>
+  <p>Suggest a route, send a window video you filmed, point out a mistake in a station story, or ask about working together. I read everything.</p>
+  <div class="cards">
+    <a id="mailCard" href="#"><b>Email</b><span id="mailText"></span></a>
+  </div>
+
+  <h2>Send a message</h2>
+  <form id="f">
+    <label>Your name<input name="name" autocomplete="name" required></label>
+    <label>Your email<input name="email" type="email" autocomplete="email" required></label>
+    <label>About
+      <select name="topic">
+        <option>A route I'd love to see</option>
+        <option>Footage I filmed</option>
+        <option>A correction</option>
+        <option>Brand or tourism partnership</option>
+        <option>Something else</option>
+      </select></label>
+    <label>Message<textarea name="msg" required></textarea></label>
+    <button type="submit">Open in my email app</button>
+    <p class="muted" style="margin:0;font-size:14px">This opens your own email app with the message filled in. Nothing is sent or stored by this page.</p>
+  </form>
+</main>
+<script>
+/* your details: change these two lines */
+const EMAIL="prachidec03@gmail.com";
+document.getElementById("mailText").textContent=EMAIL;document.getElementById("mailCard").href="mailto:"+EMAIL;
+document.getElementById("f").addEventListener("submit",e=>{e.preventDefault();const d=new FormData(e.target);
+  const body=d.get("msg")+"\n\n— "+d.get("name")+" ("+d.get("email")+")";
+  location.href="mailto:"+EMAIL+"?subject="+encodeURIComponent("Window Safar: "+d.get("topic"))+"&body="+encodeURIComponent(body)});
+</script>
+<footer><div class="in"><span>Window Safar · made in India by Prachi</span><span><a href="about.html">About</a> · <a href="contact.html">Contact</a> · <a href="privacy.html">Privacy</a> · <a href="disclosure.html">Affiliate disclosure</a></span></div></footer>
+</body></html>
