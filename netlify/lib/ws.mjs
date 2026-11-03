@@ -92,7 +92,16 @@ async function googleToken() {
     iss: email, scope: "https://www.googleapis.com/auth/datastore",
     aud: "https://oauth2.googleapis.com/token", iat: now, exp: now + 3600
   });
-  const sig = crypto.sign("RSA-SHA256", Buffer.from(unsigned), key).toString("base64url");
+  let pk;
+  try { pk = crypto.createPrivateKey(key); }
+  catch (e) {   // describe the shape of the setting (never its contents) so a bad paste is easy to spot
+    const raw = String(process.env.FIREBASE_PRIVATE_KEY || "");
+    const body = ((/-----BEGIN [A-Z ]+-----([\s\S]*?)-----END/.exec(key) || [])[1] || "").replace(/[^A-Za-z0-9+/=]/g, "");
+    throw new HttpError(500, "FIREBASE_PRIVATE_KEY can't be read: " + raw.length + " characters, " +
+      (raw.trim().startsWith("{") ? "JSON" : "text") + ", BEGIN " + /BEGIN/.test(raw) + ", END " + /END/.test(raw) +
+      ", key body " + body.length + " characters (a complete key has about 1620).");
+  }
+  const sig = crypto.sign("RSA-SHA256", Buffer.from(unsigned), pk).toString("base64url");
   const r = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion: unsigned + "." + sig })
