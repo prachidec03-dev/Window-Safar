@@ -9,7 +9,7 @@ Window Safar lets you ride Indian train routes from a window seat. Pick a route 
 
 Every route has its own page with its own preview image for WhatsApp and Google.
 
-| Free | With the Pass (demo) |
+| Free | With the Pass |
 |---|---|
 | [Kalka → Shimla](https://windowsafar.com/kalka-shimla.html) | [Siliguri → Darjeeling](https://windowsafar.com/siliguri-darjeeling.html) |
 | [Mumbai → Goa](https://windowsafar.com/mumbai-goa.html) | [Ernakulam → Kollam](https://windowsafar.com/ernakulam-kollam.html) |
@@ -107,7 +107,7 @@ Secrets (Razorpay key secret, webhook secret, Firebase service account) live onl
 |---|---|
 | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Razorpay → Account & Settings → API Keys |
 | `RAZORPAY_WEBHOOK_SECRET` | The secret you type when adding the webhook in Razorpay |
-| `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Firebase → Project settings → Service accounts → Generate new private key |
+| `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Firebase → Project settings → Service accounts → Generate new private key (the project ID, `windowsafar`, is public and lives in the code) |
 
 ## Footage credits
 
