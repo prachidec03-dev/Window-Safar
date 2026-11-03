@@ -20,7 +20,7 @@ function nextClip(auto){
   clipIdx=(clipIdx+1)%route.clips.length;startClip();if(!auto)toast("Footage "+(clipIdx+1)+" of "+route.clips.length);
 }
 function footNote(){const el=$("footNote");el.textContent="";$("mFoot").disabled=!hasFoot();$("nextClip").hidden=route.clips.length<2;
-  if(!hasFoot()){el.textContent="Real window footage for this route is still being chosen, so you're riding the animated window for now.";return}
+  if(!hasFoot()){el.textContent=!route.free&&!owned?"Real window footage on this route comes with the Window Safar Pass. Until then, enjoy the animated window.":!route.free?"Loading this route's real footage…":"Real window footage for this route is still being chosen, so you're riding the animated window for now.";return}
   const cr=route.clips[clipIdx][2]||"",who=clipAuthor[route.clips[clipIdx][0]];if(ytOK){el.textContent=(who?"Footage by "+who+" on YouTube":cr)+". Tap Different footage for the next stretch.";return}
   const a=document.createElement("a");a.href="https://www.youtube.com/watch?v="+route.clips[clipIdx][0]+"&t="+route.clips[clipIdx][1]+"s";a.target="_blank";a.rel="noopener";a.textContent="Watch the real "+route.name+" footage on YouTube ↗";el.append(a," · Host the page to play footage inside the window.")}
 async function setMode(m){

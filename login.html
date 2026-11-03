@@ -95,14 +95,17 @@ else{
     $("h").textContent="You're signed in";$("lead").hidden=true;
     const n=u.displayName||(u.email||"").split("@")[0];$("name").textContent=n;$("email").textContent=u.email||"";
     if(u.photoURL){$("av").style.backgroundImage="url('"+u.photoURL+"')";$("av").textContent=""}else $("av").textContent=(n[0]||"?").toUpperCase();
+    const next=new URLSearchParams(location.search).get("next")||lget("ws-next","");
+    if(next==="pass"){try{localStorage.removeItem("ws-next")}catch(e){}location.replace("index.html?pass=1#pass");return}
     show("in");const m=await WSAuth.sync(u)||{};
-    $("stampN").textContent=Object.keys(m["ws-stamps"]||lget("ws-stamps",{})).length;$("passS").textContent=(m["ws-pass"]||lget("ws-pass",false))?"Yes":"Not yet";
+    $("stampN").textContent=Object.keys(m["ws-stamps"]||lget("ws-stamps",{})).length;$("passS").textContent="…";
+    try{const r=await fetch("/.netlify/functions/pass-status",{method:"POST",headers:{authorization:"Bearer "+await WSAuth.token()}}),j=await r.json();$("passS").textContent=j.pass?"Active until "+new Date(j.passUntil).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}):"Not yet"}catch(e){$("passS").textContent="Not yet"}
   });
   $("google").onclick=()=>{$("err").textContent="";WSAuth.google().catch(e=>$("err").textContent=errMsg(e))};
   $("mailForm").onsubmit=async e=>{e.preventDefault();$("err").textContent="";const em=$("mail").value.trim();
-    try{await WSAuth.emailLink(em);$("sent").textContent="Check your inbox. We've sent a sign-in link to "+em+". Open it on this device.";show("sent")}catch(x){$("err").textContent=errMsg(x)}};
+    try{const nx=new URLSearchParams(location.search).get("next");if(nx)localStorage.setItem("ws-next",JSON.stringify(nx));await WSAuth.emailLink(em);$("sent").textContent="Check your inbox. We've sent a sign-in link to "+em+". Open it on this device.";show("sent")}catch(x){$("err").textContent=errMsg(x)}};
   $("signout").onclick=()=>WSAuth.signOut();
-  $("del").onclick=async()=>{if(!confirm("Delete your Window Safar account and synced stamps? Stamps saved in this browser stay here."))return;
+  $("del").onclick=async()=>{if(!confirm("Delete your Window Safar account and synced stamps? This also removes your Pass. Stamps saved in this browser stay here."))return;
     try{await WSAuth.deleteData();$("err").textContent="Your account and synced data are deleted."}catch(e){$("err").textContent=errMsg(e)}};
 }
 </script>

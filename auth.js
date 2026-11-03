@@ -10,7 +10,7 @@ window.WS_FIREBASE = {
 
 (function () {
   const V = "10.12.2", base = "https://www.gstatic.com/firebasejs/" + V + "/";
-  const KEYS = ["ws-stamps", "ws-pass", "ws-bought", "ws-prog"];
+  const KEYS = ["ws-stamps", "ws-bought", "ws-prog"];   // the Pass is never synced from the browser; only the server sets it
   const on = () => !!(window.WS_FIREBASE.apiKey && window.WS_FIREBASE.projectId);
   let ready = null, auth = null, db = null, pushT = 0;
 
@@ -32,7 +32,6 @@ window.WS_FIREBASE = {
   function merge(cloud) {
     return {
       "ws-stamps": Object.assign({}, cloud["ws-stamps"] || {}, lget("ws-stamps", {})),
-      "ws-pass": !!(cloud["ws-pass"] || lget("ws-pass", false)),
       "ws-bought": [...(cloud["ws-bought"] || []), ...lget("ws-bought", [])].slice(-40),
       "ws-prog": Object.assign({}, cloud["ws-prog"] || {}, lget("ws-prog", {}))
     };
@@ -60,6 +59,8 @@ window.WS_FIREBASE = {
 
   window.WSAuth = {
     enabled: on, init, sync, push, KEYS,
+    user() { return auth && auth.currentUser || null; },
+    async token() { const u = auth && auth.currentUser; return u ? u.getIdToken() : ""; },
     onChange(cb) { init().then(a => { if (!a) { cb(null); return; } a.onAuthStateChanged(cb); }); },
     async google() {
       const a = await init(); if (!a) throw new Error("off");

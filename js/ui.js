@@ -29,11 +29,11 @@ $("tipCopy").onclick=async()=>{try{await navigator.clipboard.writeText(PAY.upi);
 /* ---------- sign-in and sync ---------- */
 if(window.WSAuth&&WSAuth.enabled())WSAuth.onChange(async u=>{
   const el=$("navLogin");
-  if(!u){el.textContent=lang==="hi"?"साइन इन":"Sign in";el.removeAttribute("title");return}
+  if(!u){el.textContent=lang==="hi"?"साइन इन":"Sign in";el.removeAttribute("title");if(typeof passCheck==="function")passCheck();return}
   el.textContent=(u.displayName||u.email||"").split(/[ @]/)[0]||"Account";el.title="Your account";window.__wsName=u.displayName||el.textContent;
   const m=await WSAuth.sync(u);if(!m)return;
   stamps=m["ws-stamps"]||{};prog=m["ws-prog"]||{};bought=m["ws-bought"]||[];
-  const was=owned;owned=!!m["ws-pass"];renderStamps();if(owned!==was)setRoute(route);
+  renderStamps();if(typeof passCheck==="function")passCheck();
 });
 
 /* ---------- regional curtains ---------- */
@@ -188,7 +188,6 @@ function renderTickets(){
   });
 }
 $("lockBuy").onclick=()=>$("pass").scrollIntoView({behavior:"smooth",block:"center"});$("lockBack").onclick=()=>setRoute(ROUTES[0]);
-$("unlock").onclick=()=>{track("pass_demo_unlock");owned=true;store.set("ws-pass",true);setRoute(route);$("passNote").textContent="Unlocked on this device for the demo. All routes are open.";toast("All routes unlocked. Enjoy the ride.")};
 
 /* ---------- controls ---------- */
 document.querySelectorAll("[data-mix]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-mix]").forEach(x=>x.setAttribute("aria-pressed",x===b));music.setMix(b.dataset.mix)});

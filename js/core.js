@@ -10,7 +10,7 @@ const HI={nRide:"सफ़र",nPlat:"प्लेटफ़ॉर्म",nFriend
  akP:"ऐसा हिंदी फ़िल्मी गाना बताइए जो पिछले गाने के आख़िरी अक्षर से शुरू हो। 30 सेकंड हैं।",akLast:"पिछला गाना",akGo:"गाओ",akStart:"नया खेल",
  fH:"यह रूट",fP:"खिड़की को 2036 पर कीजिए और भविष्य की कल्पना देखिए, पुदीने के रंगों में। अपना विचार जोड़िए, वह खिड़की में दिखेगा।",fIdea:"2036 के लिए आपका विचार",fAdd:"खिड़की में जोड़ें",fShows:"2036 की खिड़की में क्या है",
  yourB:"आपके",badgesW:"बैज",stampP:"हर स्टेशन पर रुकने पर एक ठप्पा मिलता है, और प्लेटफ़ॉर्म पर उतरने पर एक ख़ास ठप्पा।",pickA:"चुनिए एक",freeN:"5 मुफ़्त · 4 पास के साथ",
- pass1:"चार और रूट: दार्जिलिंग, केरल के बैकवॉटर, समुद्र पर रामेश्वरम और अराकु घाटी",pass2:"हर महीने एक नया रूट",pass3:"लंबी यात्राएँ और हर रूट पर नए स्टेशन",share:"यह रूट शेयर करें ↗",rPages:"रूट का पेज शेयर करें:",timerH:"फ़ोकस और नींद टाइमर",tFocus:"फ़ोकस",tSleep:"नींद",tOff:"बंद",timerNote:"फ़ोकस में खिड़की चलती रहती है, सहयात्री और घोषणाएँ चुप रहते हैं। नींद में समय पूरा होने पर पर्दे बंद हो जाते हैं और आवाज़ रुक जाती है।",sleepE:"नींद टाइमर",sleepH:"शुभ रात्रि",wake:"जागिए, फिर से सफ़र कीजिए",unlock:"सारे रूट खोलें (डेमो)",
+ pass1:"चार और रूट: दार्जिलिंग, केरल के बैकवॉटर, समुद्र पर रामेश्वरम और अराकु घाटी",pass2:"हर महीने एक नया रूट",pass3:"लंबी यात्राएँ और हर रूट पर नए स्टेशन",share:"यह रूट शेयर करें ↗",rPages:"रूट का पेज शेयर करें:",timerH:"फ़ोकस और नींद टाइमर",tFocus:"फ़ोकस",tSleep:"नींद",tOff:"बंद",timerNote:"फ़ोकस में खिड़की चलती रहती है, सहयात्री और घोषणाएँ चुप रहते हैं। नींद में समय पूरा होने पर पर्दे बंद हो जाते हैं और आवाज़ रुक जाती है।",sleepE:"नींद टाइमर",sleepH:"शुभ रात्रि",wake:"जागिए, फिर से सफ़र कीजिए",unlock:"पास लीजिए · ₹149/साल",
  foot:"खिड़की के वीडियो उनके रचनाकारों के YouTube वीडियो हैं, और गाने Spotify पर चलते हैं। मौसम Open-Meteo से। स्टेशन की कहानियाँ छोटे सार हैं, यात्रा से पहले जाँच लें।"};
 const EN={};document.querySelectorAll("[data-i18n]").forEach(el=>EN[el.dataset.i18n]=el.textContent);
 let lang="en";try{lang=localStorage.getItem("ws-lang")||"en"}catch(e){}
@@ -54,7 +54,7 @@ async function loadWeather(r){
 
 /* ---------- state ---------- */
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}if(window.WSAuth&&WSAuth.KEYS.includes(k))WSAuth.push()}};
-let owned=store.get("ws-pass",false);
+let owned=(()=>{const c=store.get("ws-pass2",null);return !!(c&&Date.parse(c.until)>Date.now())})();   // a cached copy; the server confirms it (js/pass.js)
 let route=ROUTES[0],timeSel="now",syncWx=true,speedMul=1,dist=0,wx=null,selStn=0,clipIdx=0,era=0,userPicked=false,preview=0;
 let mode="anim",modeBeforeFuture="anim",ytOK=null,player=null,view="ride",platStn=0,platX=0,platTime=0;
 const GAP=7000;

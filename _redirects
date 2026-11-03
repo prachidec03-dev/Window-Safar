@@ -1,0 +1,5 @@
+# Keep server-only files private (the site folder is published as it is)
+/netlify/*        /404.html  404!
+/tools/*          /404.html  404!
+/firestore.rules  /404.html  404!
+/netlify.toml     /404.html  404!

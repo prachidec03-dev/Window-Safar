@@ -31,7 +31,7 @@ Also try the **Focus and sleep timer**, **Play music**, the **co-passenger**, **
 
 - **Affiliate links** on every route: "Book this train" and "Stay in…" through EarnKaro, and "Take home" souvenirs through Amazon Associates.
 - **UPI tips**: "Buy the maker a chai".
-- **Window Safar Pass** (₹149/year, demo): extra routes. Payments will go through Razorpay.
+- **Window Safar Pass** (₹149/year): four more routes with real footage. Paid through Razorpay and checked on the server (see below).
 
 ## Measuring it
 
@@ -47,6 +47,7 @@ Microsoft Clarity records visits privately (only the owner sees the dashboard). 
 | `focus_timer_start` · `focus_timer_done` · `sleep_timer_start` · `sleep_timer_done` | The timer |
 | `music_play` · `share_route` | Music, and sharing a route page |
 | `affiliate_train` · `affiliate_stay` · `affiliate_amazon` · `tip_chai` / `tip_coffee` / `tip_momos` | Money clicks |
+| `pass_click` · `pass_checkout_open` · `pass_purchased` · `pass_payment_failed` | The Pass funnel |
 | `return_visit` | The same browser comes back on a different day |
 
 Clarity also tags each session with `visitor` (new or returning) and `route`.
@@ -58,7 +59,8 @@ Clarity also tags each session with `visitor` (new or returning) and `route`.
 - Window footage embedded with YouTube's official player; songs with Spotify's official player
 - Live weather from Open-Meteo (no API key)
 - Visitor analytics with Microsoft Clarity
-- Sign-in and stamp sync ready with Firebase (switched off until configured)
+- Sign-in (Google or an email link) and stamp sync with Firebase Authentication and Firestore
+- Pass payments with Razorpay Checkout, verified by Netlify Functions (`netlify/functions/`)
 
 ## Files
 
@@ -79,11 +81,33 @@ Clarity also tags each session with `visitor` (new or returning) and `route`.
 | `js/timer.js` | Focus and sleep timer |
 | `js/qrcode.js` | QR codes for UPI tips (qrcode-generator, MIT) |
 | `about.html`, `contact.html`, `privacy.html`, `disclosure.html`, `login.html` | Supporting pages, styled by `pages.css` |
-| `auth.js` | Optional sign-in (Firebase) |
+| `auth.js` | Sign-in and stamp sync (Firebase) |
+| `js/pass.js` | The Pass button and Razorpay Checkout |
+| `netlify/functions/` | Server code: `pass-order`, `pass-verify`, `pass-status`, `razorpay-webhook` |
+| `netlify/lib/` | Shared server code, and the Pass routes' footage list |
+| `firestore.rules` | Firestore security rules (paste into Firebase) |
+| `netlify.toml`, `_redirects`, `404.html` | Netlify settings, private paths and the not-found page |
 | `photos/` | Food and platform photos (my own), and `photos/routes/` preview images |
 | `favicon.svg`, `favicon.ico`, `icon-*.png`, `site.webmanifest` | Icons |
 | `robots.txt`, `sitemap.xml` | For search engines |
 | `tools/make_route_pages.py` | Rebuilds the route pages and sitemap: `python3 tools/make_route_pages.py` |
+
+## How the Pass is protected
+
+1. You sign in, so the Pass belongs to your account rather than one browser.
+2. `pass-order` (server) creates a ₹149 Razorpay order tagged with your account.
+3. Razorpay Checkout takes the payment (UPI, card or netbanking).
+4. `pass-verify` (server) checks Razorpay's signature with the secret key, confirms the order is yours, paid and ₹149, and only then writes `pass: true` and `passUntil` to Firestore. `razorpay-webhook` does the same if the tab was closed.
+5. `firestore.rules` lets each person edit only their own document and never the Pass fields; only the server's service account can set them.
+6. On each visit `pass-status` confirms the Pass and only then sends the Pass routes' footage, so changing anything in the browser console can't unlock it.
+
+Secrets (Razorpay key secret, webhook secret, Firebase service account) live only in Netlify's environment variables. The functions use no npm packages.
+
+| Netlify environment variable | Where it comes from |
+|---|---|
+| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Razorpay → Account & Settings → API Keys |
+| `RAZORPAY_WEBHOOK_SECRET` | The secret you type when adding the webhook in Razorpay |
+| `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Firebase → Project settings → Service accounts → Generate new private key |
 
 ## Footage credits
 
