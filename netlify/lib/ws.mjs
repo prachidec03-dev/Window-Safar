@@ -14,7 +14,7 @@ export class HttpError extends Error { constructor(status, msg) { super(msg); th
 const PUBLIC = { FIREBASE_PROJECT_ID: "windowsafar" };
 
 export function env(k) {
-  const v = process.env[k] || PUBLIC[k];
+  const v = String(process.env[k] || PUBLIC[k] || "").trim().replace(/^["']+|["',]+$/g, "");   // forgive stray quotes or spaces from pasting
   if (!v) throw new HttpError(500, "The Pass is not set up yet (missing " + k + ").");
   return v;
 }
@@ -69,11 +69,23 @@ export async function userFrom(req) {
   catch (e) { if (e instanceof HttpError) throw e; throw new HttpError(401, "Your sign-in has expired. Please sign in again."); }
 }
 
+/* accept the private key however it was pasted: with or without quotes, with \n or real line breaks,
+   with spaces instead of line breaks, or even the whole service-account JSON */
+export function cleanKey(raw) {
+  let k = String(raw).trim();
+  if (k.startsWith("{")) { try { k = JSON.parse(k).private_key || k; } catch (e) {} }
+  k = k.replace(/^["']+|["',]+$/g, "").replace(/\\r/g, "").replace(/\\n/g, "\n");
+  const m = /-----BEGIN ([A-Z ]+)-----([\s\S]*?)-----END \1-----/.exec(k);
+  if (!m) return k;
+  const body = m[2].replace(/[^A-Za-z0-9+/=]/g, "");
+  return "-----BEGIN " + m[1] + "-----\n" + body.match(/.{1,64}/g).join("\n") + "\n-----END " + m[1] + "-----\n";
+}
+
 /* ---------- Firestore with the service account ---------- */
 let gTok = null, gExp = 0;
 async function googleToken() {
   if (gTok && Date.now() < gExp - 60e3) return gTok;
-  const email = env("FIREBASE_CLIENT_EMAIL"), key = env("FIREBASE_PRIVATE_KEY").replace(/\\n/g, "\n");
+  const email = env("FIREBASE_CLIENT_EMAIL"), key = cleanKey(env("FIREBASE_PRIVATE_KEY"));
   const now = Math.floor(Date.now() / 1000);
   const enc = o => Buffer.from(JSON.stringify(o)).toString("base64url");
   const unsigned = enc({ alg: "RS256", typ: "JWT" }) + "." + enc({
