@@ -1,11 +1,10 @@
 /* Window Safar sign-in, powered by Firebase (free Spark plan).
-   To switch it on, paste your Firebase web app config into the object below.
-   Until then the site works normally and the login page says sign-in is coming soon. */
+   Firebase project: windowsafar (this config is public by design; security comes from firestore.rules). */
 window.WS_FIREBASE = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  appId: ""
+  apiKey: "AIzaSyAOoP-JzL7pLbjqYqEquaGXftZ8-FX15xA",
+  authDomain: "windowsafar.firebaseapp.com",
+  projectId: "windowsafar",
+  appId: "1:471808065825:web:7681af1fb6a1bc92b13e60"
 };
 
 (function () {
