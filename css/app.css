@@ -540,3 +540,16 @@ nav{backdrop-filter:blur(10px);border-bottom:1px solid rgba(233,220,196,.12)}
 footer{border-top-color:rgba(233,220,196,.14)}
 @media (prefers-reduced-motion:reduce){.tile img{animation:none}}
 @media (prefers-reduced-motion:reduce){.flap.spin,.music.playing .bars-eq i,.marquee div,.ticker span,.steam path,.stamp-new,.badge.new,.horn{animation:none}.ticket{transition:none}body{transition:none}}
+
+/* ---------- focus and sleep timer, footage credit, share ---------- */
+.timer{display:grid;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.timer .trow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.timer select{font:inherit;font-size:13px;font-weight:600;color:#f1ebde;background:transparent;border:1px solid #5a5348;border-radius:8px;padding:7px 10px}
+.timer select option{color:#141414}
+.timechip{background:#f6c701;color:#141414;font-weight:600}
+.credit{position:absolute;right:12px;top:46px;z-index:3;pointer-events:auto;text-decoration:none;max-width:calc(50% - 20px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.credit:hover,.credit:focus-visible{background:#141414;color:#f6c701;outline:none}
+.sleepcover{position:absolute;inset:0;display:grid;place-items:center;background:#05070fd9;backdrop-filter:blur(4px);text-align:center;padding:16px;color:#f1efe7;z-index:5}
+.sleepcover > div{max-width:34ch;display:grid;gap:10px;justify-items:center}
+.sharerow{margin:4px 0 10px}
+@media (max-width:600px){.credit{top:auto;bottom:10px;font-size:10.5px}}

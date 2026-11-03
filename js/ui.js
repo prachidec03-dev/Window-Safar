@@ -14,7 +14,7 @@ function renderReal(){
 const TIPS={chai:[10,"a kulhad chai"],coffee:[20,"a filter coffee"],momos:[60,"a plate of momos"]};
 const upiLink=(amt,what)=>"upi://pay?pa="+encodeURIComponent(PAY.upi)+"&pn="+encodeURIComponent(PAY.name)+"&am="+amt+".00&cu=INR&tn="+encodeURIComponent("Window Safar: "+what);
 const isPhone=()=>/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-document.querySelectorAll("[data-tip]").forEach(b=>b.onclick=async()=>{
+document.querySelectorAll("[data-tip]").forEach(b=>b.onclick=async()=>{track("tip_"+b.dataset.tip);
   const [amt,what]=TIPS[b.dataset.tip];document.querySelectorAll("[data-tip]").forEach(x=>x.setAttribute("aria-pressed",x===b));
   if(!PAY.upi){toast("Tips switch on once the UPI ID is added.");return}
   const link=upiLink(amt,what);$("tipWhat").textContent="₹"+amt+" for "+what+". Thank you!";$("tipId").textContent=PAY.upi;$("tipOpen").href=link;
@@ -138,11 +138,12 @@ function setView(v){
 function getDown(i){
   if(locked()){toast("This route's platforms open with the Window Safar Pass.");return}
   try{audio()}catch(e){}
-  platStn=i;if(mode==="anim")dist=i*GAP;setView("platform");collect(i,"down");if(!cpSaid.down){cpSaid.down=1;setTimeout(()=>{const c=cpChar();if(c&&cpOn)cpShow(cpIsHi(c)?CP_DOWN.hi:CP_DOWN.en)},2500)}announce(...A.platform(route.st[i][0]));
+  platStn=i;if(mode==="anim")dist=i*GAP;setView("platform");collect(i,"down");track("got_down");if(!cpSaid.down){cpSaid.down=1;setTimeout(()=>{const c=cpChar();if(c&&cpOn)cpShow(cpIsHi(c)?CP_DOWN.hi:CP_DOWN.en)},2500)}announce(...A.platform(route.st[i][0]));
   document.getElementById("ride").scrollIntoView({behavior:"smooth",block:"start"});
 }
 function renderPlatStations(){const box=$("platStations");box.innerHTML="";route.st.forEach((s,i)=>{const b=document.createElement("button");b.type="button";b.className="tog";b.textContent=(lang==="hi"?"उतरें: ":"Get down at ")+s[0];b.setAttribute("aria-pressed",view==="platform"&&i===platStn);b.onclick=()=>getDown(i);box.appendChild(b)})}
-$("platBtn").onclick=()=>{if(view==="platform")setView("ride");else getDown(Math.max(0,curStation()))};
+function boardAgain(){setView("ride");track("boarded_again");const nx=route.st[Math.min(n()-1,platStn+1)][0];toast(lang==="hi"?"सब सवार! अगला स्टेशन: "+nx:"All aboard! Next station: "+nx);try{horn(false)}catch(e){}}
+$("platBtn").onclick=()=>{if(view==="platform")boardAgain();else getDown(Math.max(0,curStation()))};
 
 function rotateIdea(){}
 
@@ -165,7 +166,14 @@ function setRoute(r){
   if(mode==="foot"){if(hasFoot())startClip();else setMode("anim")}else if(ytOK&&hasFoot()&&!era)setMode("foot");renderReal();
   flipTo("TO "+dest());clearTimeout(boardTimer);boardTimer=setTimeout(()=>flipTo(era?"YEAR 2036":"WINDOW SAFAR"),2600);
   if(changed)announce(...A.welcome(r.name.replace("→","to")),false);
+  if(changed){track("route_"+r.id);try{window.clarity&&clarity("set","route",r.id)}catch(e){}}
 }
+/* one shareable page per route */
+const slugOf=r=>r.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const routeUrl=r=>"https://windowsafar.com/"+slugOf(r)+".html";
+$("shareBtn").onclick=async()=>{const url=routeUrl(route),text=(lang==="hi"?"मेरे साथ यह ट्रेन सफ़र कीजिए: ":"Ride the ")+route.name.replace("→","to")+(lang==="hi"?"":" train with me, from your desk. Real window footage, chai and a stamp book.");track("share_route");
+  if(navigator.share){try{await navigator.share({title:"Window Safar · "+route.name,text,url});return}catch(e){if(e&&e.name==="AbortError")return}}
+  try{await navigator.clipboard.writeText(text+" "+url);toast(lang==="hi"?"लिंक कॉपी हो गया। WhatsApp पर भेजिए!":"Link copied. Paste it in WhatsApp!")}catch(e){toast(url)}};
 function renderTickets(){
   const box=$("tickets");box.innerHTML="";
   ROUTES.forEach((r,ix)=>{
@@ -180,7 +188,7 @@ function renderTickets(){
   });
 }
 $("lockBuy").onclick=()=>$("pass").scrollIntoView({behavior:"smooth",block:"center"});$("lockBack").onclick=()=>setRoute(ROUTES[0]);
-$("unlock").onclick=()=>{owned=true;store.set("ws-pass",true);setRoute(route);$("passNote").textContent="Unlocked on this device for the demo. All routes are open.";toast("All routes unlocked. Enjoy the ride.")};
+$("unlock").onclick=()=>{track("pass_demo_unlock");owned=true;store.set("ws-pass",true);setRoute(route);$("passNote").textContent="Unlocked on this device for the demo. All routes are open.";toast("All routes unlocked. Enjoy the ride.")};
 
 /* ---------- controls ---------- */
 document.querySelectorAll("[data-mix]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-mix]").forEach(x=>x.setAttribute("aria-pressed",x===b));music.setMix(b.dataset.mix)});
@@ -212,5 +220,7 @@ $("sound").onclick=e=>{const on=sound.toggle();e.currentTarget.setAttribute("ari
 (function(){const m=$("mosaic");if(m)requestAnimationFrame(()=>m.classList.add("pop"))})();
 /* ---------- start ---------- */
 $("marquee").innerHTML=(ROUTES.map(r=>`<span><b>${r.st[0][0]}</b> → ${r.st[r.st.length-1][0]}</span>`).join("")).repeat(2);
-route=null;setRoute(ROUTES[0]);resize();renderStamps();applyLang();requestAnimationFrame(frame);
+/* a route page (for example kalka-shimla.html) or ?route=shimla opens that route */
+const startRoute=(()=>{let id=window.WS_ROUTE||"";try{id=new URLSearchParams(location.search).get("route")||id}catch(e){}return ROUTES.find(r=>r.id===id||slugOf(r)===id)||ROUTES[0]})();
+route=null;setRoute(startRoute);resize();renderStamps();applyLang();requestAnimationFrame(frame);
 loadYT().then(ok=>{music.label();footNote();if(ok&&!era&&hasFoot())setMode("foot")});

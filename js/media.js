@@ -3,8 +3,16 @@
 function loadYT(){return new Promise(res=>{if(window.YT&&YT.Player){ytOK=true;return res(true)}const s=document.createElement("script");s.src="https://www.youtube.com/iframe_api";const to=setTimeout(()=>{ytOK=false;res(false)},6000);s.onerror=()=>{clearTimeout(to);ytOK=false;res(false)};window.onYouTubeIframeAPIReady=()=>{clearTimeout(to);ytOK=true;res(true)};document.head.appendChild(s)})}
 const hasFoot=()=>route.clips.length>0;
 function startClip(){if(!hasFoot()){setMode("anim");return}const [id,start]=route.clips[clipIdx];$("yt").hidden=false;
-  if(!player)player=new YT.Player("yt",{videoId:id,playerVars:{autoplay:1,mute:1,controls:0,start,rel:0,playsinline:1,modestbranding:1,iv_load_policy:3,disablekb:1},events:{onReady:e=>{e.target.mute();e.target.playVideo()},onError:()=>nextClip(true)}});
-  else player.loadVideoById({videoId:id,startSeconds:start});$("vidAudio").setAttribute("aria-pressed","false")}
+  if(!player)player=new YT.Player("yt",{videoId:id,playerVars:{autoplay:1,mute:1,controls:0,start,rel:0,playsinline:1,modestbranding:1,iv_load_policy:3,disablekb:1},events:{onReady:e=>{e.target.mute();e.target.playVideo()},onError:()=>nextClip(true),onStateChange:e=>{if(e.data===1)credit(true)}}});
+  else player.loadVideoById({videoId:id,startSeconds:start});$("vidAudio").setAttribute("aria-pressed","false");credit()}
+/* who filmed this footage: shown on the window, taken from YouTube itself when it can be */
+const clipAuthor={};
+function credit(live){const el=$("credit");if(mode!=="foot"||view!=="ride"||!hasFoot()||!ytOK){el.hidden=true;return}
+  const [id,start,cr]=route.clips[clipIdx];
+  if(live&&player&&player.getVideoData){try{const d=player.getVideoData();if(d&&d.video_id===id&&d.author)clipAuthor[id]=d.author}catch(e){}}
+  const fallback=/·\s*(.+)$/.exec(cr||"");const who=clipAuthor[id]||(fallback&&!/YouTube/.test(fallback[1])?fallback[1]:"");
+  el.href="https://www.youtube.com/watch?v="+id+"&t="+start+"s";el.textContent=(lang==="hi"?"🎥 फ़ुटेज: ":"🎥 Footage: ")+(who||"YouTube creator")+" ↗";el.title=lang==="hi"?"यह वीडियो YouTube पर देखें":"Watch the full video on YouTube and support the creator";el.hidden=false;
+  if(live)footNote()}
 function nextClip(auto){
   if(!hasFoot())return;
   if(!ytOK){clipIdx=(clipIdx+1)%route.clips.length;footNote();toast("Footage "+(clipIdx+1)+" of "+route.clips.length+" (link below the window)");return}
@@ -13,16 +21,17 @@ function nextClip(auto){
 }
 function footNote(){const el=$("footNote");el.textContent="";$("mFoot").disabled=!hasFoot();$("nextClip").hidden=route.clips.length<2;
   if(!hasFoot()){el.textContent="Real window footage for this route is still being chosen, so you're riding the animated window for now.";return}
-  const cr=route.clips[clipIdx][2]||"";if(ytOK){el.textContent=cr+". Tap Different footage for the next stretch.";return}
+  const cr=route.clips[clipIdx][2]||"",who=clipAuthor[route.clips[clipIdx][0]];if(ytOK){el.textContent=(who?"Footage by "+who+" on YouTube":cr)+". Tap Different footage for the next stretch.";return}
   const a=document.createElement("a");a.href="https://www.youtube.com/watch?v="+route.clips[clipIdx][0]+"&t="+route.clips[clipIdx][1]+"s";a.target="_blank";a.rel="noopener";a.textContent="Watch the real "+route.name+" footage on YouTube ↗";el.append(a," · Host the page to play footage inside the window.")}
 async function setMode(m){
   if(m==="foot"&&era){toast("2036 can only be imagined, so it uses the animated window.");m="anim"}
   if(m==="foot"&&!hasFoot()){toast("Real footage for this route is coming soon.");m="anim"}
   if(m==="foot"){if(ytOK===null)await loadYT();if(!ytOK){toast("Use the link below the window to watch the real footage.");m="anim"}}
   mode=m;$("mFoot").setAttribute("aria-pressed",m==="foot");$("mAnim").setAttribute("aria-pressed",m==="anim");hudMode();$("vidAudio").hidden=m!=="foot";
+  if(m==="foot")track("real_footage");
   if(m==="foot"&&view==="ride")startClip();else{$("yt").hidden=true;if(player&&player.pauseVideo)player.pauseVideo()}
 }
-function hudMode(){$("hudMode").textContent=view==="platform"?(lang==="hi"?"प्लेटफ़ॉर्म पर · चलने के लिए खींचें":"On the platform · drag to walk"):era?"Window to 2036 · imagined":mode==="foot"?"Real footage":"Animated window"}
+function hudMode(){credit();$("hudMode").textContent=view==="platform"?(lang==="hi"?"प्लेटफ़ॉर्म पर · चलने के लिए खींचें":"On the platform · drag to walk"):era?"Window to 2036 · imagined":mode==="foot"?"Real footage":"Animated window"}
 
 /* ---------- music ---------- */
 let mix="mix";
@@ -64,7 +73,7 @@ const music=(()=>{
     if(!ytOK){$("npTitle").textContent=route.tune+" (original tune)";$("npSub").textContent="Made in your browser for this route"}
     const a=document.createElement("a");a.href=spUrl(sg);a.target="_blank";a.rel="noopener";a.textContent=sg[1]+" ("+sg[2]+") on Spotify ↗";el.append(tag?"Classic for this route: ":"Film song for this route: ",a,ytOK?"":". Film songs play right here once the page is hosted.")}
   async function playSong(){if(!sp)await loadSpotify();if(!sp){startTune();label();return}stopTune();$("mplayer").hidden=false;sp.loadUri("spotify:track:"+song()[0]);setTimeout(()=>{try{sp.play()}catch(e){}},400);label()}
-  function start(){on=true;$("music").classList.add("playing");label();if(ytOK)playSong();else startTune()}
+  function start(){on=true;track("music_play");$("music").classList.add("playing");label();if(ytOK)playSong();else startTune()}
   function stop(){on=false;$("music").classList.remove("playing");stopTune();if(sp)try{sp.pause()}catch(e){}}
   function next(){idx++;label();if(on){if(sp)playSong()}}
   return{toggle(){on?stop():start();return on},route(){idx=0;label();if(on){if(sp)playSong();else startTune()}},next,label,setMix(m){mix=m;idx=0;label();if(on&&sp)playSong()},song};

@@ -47,7 +47,7 @@ function collect(i,kind){
   stamps[k]=new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short"}).toUpperCase();store.set("ws-stamps",stamps);
   const wk=sceneWx(),tm=sceneTime();if(wk==="rain"||wk==="storm")prog.rain=true;if(tm==="night")prog.night=true;
   const done=!kind&&route.st.every((_,j)=>stamps[skey(route,j)]);if(done)(prog.done=prog.done||{})[route.id]=true;saveProg();
-  renderStamps(k);pressStamp(route,i,stamps[k],kind);
+  renderStamps(k);pressStamp(route,i,stamps[k],kind);track("stamp_collected");if(done)track("route_completed");
   toast(done?(lang==="hi"?"रूट पूरा! आपकी किताब में सुनहरी मुहर लगी।":"Route complete! A gold seal is in your stamp book."):(kind?"Got-down stamp: ":"Stamp collected: ")+route.st[i][0]);
 }
 /* the rubber-stamp moment on the window */
@@ -61,8 +61,8 @@ let bookPage=0,bookFresh=null;
 const routeGot=r=>r.st.filter((_,i)=>stamps[skey(r,i)]).length;
 function renderStamps(fresh){
   if(fresh)bookFresh=fresh;
-  const total=ROUTES.reduce((a,r)=>a+r.st.length,0),got=Object.keys(stamps).filter(k=>k.split(":").length===2).length;
-  $("stampCount").textContent=got+(lang==="hi"?" ठप्पे":" stamps");
+  const total=ROUTES.reduce((a,r)=>a+r.st.length,0),got=Object.keys(stamps).length;
+  $("stampCount").textContent=got+(lang==="hi"?" ठप्पे":got===1?" stamp":" stamps");
   const recent=Object.entries(stamps).slice(-4).reverse(),mini=$("miniStamps");mini.innerHTML="";
   if(!recent.length)mini.innerHTML='<p class="mutedline">Your first stamp arrives at the next station.</p>';
   for(const [k,d] of recent){const [rid,i,kind]=k.split(":"),r=ROUTES.find(x=>x.id===rid);if(r){const w=document.createElement("span");w.innerHTML=stampArt(r,+i,d,kind);if(k===fresh)w.firstChild.classList.add("stamp-new");mini.appendChild(w.firstChild)}}

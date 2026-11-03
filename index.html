@@ -24,6 +24,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="css/app.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0d0b">
 </head><body style="margin:0">
 
 <nav>
@@ -88,6 +93,7 @@
             <div class="press" id="press" hidden aria-hidden="true"></div>
             <div class="hud">
               <span class="chip" id="hudNext">Next: <b>—</b></span>
+              <span class="chip timechip" id="hudTimer" hidden></span>
               <span class="chip modechip" id="hudMode">Animated window</span>
             </div>
             <div class="copax" id="copax" hidden role="status"><span class="cp-av" id="cpAv" aria-hidden="true"></span><div class="cp-body"><div class="cp-who"><b id="cpName"></b><span class="sep"> · </span><span id="cpRole"></span></div><p class="cp-line" id="cpLine"></p><p class="cp-tr" id="cpTr"></p></div><button class="cp-x" type="button" id="cpX" aria-label="Hide">×</button></div>
@@ -95,6 +101,8 @@
               <span class="chip annchip" id="annChip" hidden></span>
               <span class="chip ideachip" id="hudIdea" hidden></span>
             </div>
+            <a class="chip credit" id="credit" hidden target="_blank" rel="noopener"></a>
+            <div class="sleepcover" id="sleepCover" hidden><div><div class="eyebrow" style="color:#c9d6d2" data-i18n="sleepE">Sleep timer</div><div class="route-title" data-i18n="sleepH">Good night</div><p id="sleepText">The train has stopped for the night.</p><button class="ghost" type="button" id="wakeBtn" style="color:#f1efe7" data-i18n="wake">Wake up and ride again</button></div></div>
             <div class="ticker" id="ticker" hidden><span id="tickerText"></span></div>
             <div class="horn" id="hornFx" hidden></div>
             <div class="lockcover" id="lock" hidden>
@@ -161,6 +169,7 @@
       <div class="card">
         <h3 class="route-title" id="rt">Kalka → Shimla</h3>
         <p class="blurb" id="rb"></p>
+        <div class="ctrls sharerow"><button class="tog" type="button" id="shareBtn" data-i18n="share">Share this route ↗</button></div>
         <div class="real"><span class="eyebrow" data-i18n="realH">Ride it for real</span><div class="reallinks" id="realLinks"></div><p class="disclose"><span data-i18n="disclose">Some of these links may earn Window Safar a small commission, at no extra cost to you.</span> <a href="disclosure.html" data-i18n="discMore">How this works</a></p></div>
         <p class="futnote" id="fn" hidden></p>
       </div>
@@ -174,8 +183,17 @@
           <button class="tog" type="button" id="ac" aria-pressed="false" data-i18n="acCoach">AC coach</button>
           <button class="tog" type="button" id="cpBtn" aria-pressed="true" data-i18n="coPax">Co-passenger</button>
         </div>
-        <div class="row">
-          
+        <div class="timer" id="timer">
+          <span class="eyebrow" data-i18n="timerH">Focus and sleep timer</span>
+          <div class="trow">
+            <div class="seg" role="group" aria-label="Timer">
+              <button type="button" data-tmode="focus" aria-pressed="false" data-i18n="tFocus">Focus</button>
+              <button type="button" data-tmode="sleep" aria-pressed="false" data-i18n="tSleep">Sleep</button>
+              <button type="button" data-tmode="off" aria-pressed="true" data-i18n="tOff">Off</button>
+            </div>
+            <select id="tMins" aria-label="Minutes"><option value="15">15 min</option><option value="25" selected>25 min</option><option value="45">45 min</option><option value="60">60 min</option></select>
+          </div>
+          <p class="note" id="timerNote" data-i18n="timerNote">Focus keeps the window going and quiets your co-passenger and the announcements. Sleep closes the curtains and stops the sound when time is up.</p>
         </div>
       </div>
     </div>
@@ -213,7 +231,7 @@
       <ul>
         <li data-i18n="pass1">Four more routes: Darjeeling, Kerala's backwaters, Rameswaram over the sea and the Araku Valley</li>
         <li data-i18n="pass2">A new route every month</li>
-        <li data-i18n="pass3">Sleep timer and longer journeys</li>
+        <li data-i18n="pass3">Longer journeys and new stations on every route</li>
       </ul>
       <p class="note" id="passNote">Demo for class: no payment is taken. In the real app this button would open a payment page such as Razorpay.</p>
       <div class="ctrls"><button class="cta" type="button" id="unlock" data-i18n="unlock">Unlock all routes (demo)</button></div>
@@ -241,6 +259,7 @@
 <script src="auth.js"></script>
 <script src="js/qrcode.js"></script>
 <script src="js/settings.js"></script>
+<script src="js/analytics.js"></script>
 <script src="js/routes.js"></script>
 <script src="js/core.js"></script>
 <script src="js/platform.js"></script>
@@ -248,5 +267,6 @@
 <script src="js/table.js"></script>
 <script src="js/stamps.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/timer.js"></script>
 
 </body></html>
