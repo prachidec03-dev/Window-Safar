@@ -10,8 +10,11 @@ export const PASS_DAYS = 365;
 
 export class HttpError extends Error { constructor(status, msg) { super(msg); this.status = status; } }
 
+/* public, non-secret settings (the Firebase project ID is already visible in auth.js) */
+const PUBLIC = { FIREBASE_PROJECT_ID: "windowsafar" };
+
 export function env(k) {
-  const v = process.env[k];
+  const v = process.env[k] || PUBLIC[k];
   if (!v) throw new HttpError(500, "The Pass is not set up yet (missing " + k + ").");
   return v;
 }
