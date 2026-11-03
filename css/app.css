@@ -552,4 +552,6 @@ footer{border-top-color:rgba(233,220,196,.14)}
 .sleepcover{position:absolute;inset:0;display:grid;place-items:center;background:#05070fd9;backdrop-filter:blur(4px);text-align:center;padding:16px;color:#f1efe7;z-index:5}
 .sleepcover > div{max-width:34ch;display:grid;gap:10px;justify-items:center}
 .sharerow{margin:4px 0 10px}
-@media (max-width:600px){.credit{top:auto;bottom:10px;font-size:10.5px}}
+@media (max-width:600px){.credit{top:40px;font-size:10.5px;padding:4px 8px;max-width:calc(100% - 24px)}}
+.routelinks{font-size:14px;color:var(--muted);line-height:1.9;margin:0}
+.routelinks a{color:inherit;text-underline-offset:3px;white-space:nowrap}
