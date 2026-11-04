@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /login.html
-Disallow: /tools/
-
-Sitemap: https://windowsafar.com/sitemap.xml
