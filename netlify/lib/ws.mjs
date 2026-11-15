@@ -1,7 +1,7 @@
 /* Window Safar · shared server code for the Pass (Netlify Functions, no npm packages).
    - checks the Firebase sign-in token sent by the browser
    - reads and writes the user's Pass in Firestore with the service account
-   - talks to Razorpay with the secret key
+   - talks to Dodo Payments with the secret API key
    All secrets come from Netlify environment variables and never reach the browser. */
 import crypto from "node:crypto";
 
@@ -148,20 +148,40 @@ export async function grantPass(uid, paymentId, orderId) {
   return { pass: true, passUntil: until };
 }
 
-/* ---------- Razorpay ---------- */
-export async function razorpay(path, opt = {}) {
-  const auth = "Basic " + Buffer.from(env("RAZORPAY_KEY_ID") + ":" + env("RAZORPAY_KEY_SECRET")).toString("base64");
-  const r = await fetch("https://api.razorpay.com/v1/" + path, {
-    ...opt, headers: { authorization: auth, "content-type": "application/json" }
+/* ---------- Dodo Payments ---------- */
+/* DODO_MODE=live switches to real payments; anything else (or unset) stays in test mode */
+export const isTestMode = () => String(process.env.DODO_MODE || "").trim().toLowerCase() !== "live";
+const dodoBase = () => isTestMode() ? "https://test.dodopayments.com" : "https://live.dodopayments.com";
+export async function dodo(path, opt = {}) {
+  const r = await fetch(dodoBase() + "/" + path, {
+    ...opt, headers: { authorization: "Bearer " + env("DODO_API_KEY"), "content-type": "application/json" }
   });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new HttpError(502, "Razorpay: " + (j.error && j.error.description || ("error " + r.status)));
+  if (!r.ok) throw new HttpError(502, "Dodo Payments: " + (j.message || j.error || ("error " + r.status)));
   return j;
 }
 
-export const hmacHex = (secret, data) => crypto.createHmac("sha256", secret).update(data).digest("hex");
 export function safeEqual(a, b) {
   const x = Buffer.from(String(a)), y = Buffer.from(String(b));
   return x.length === y.length && crypto.timingSafeEqual(x, y);
 }
-export const isTestMode = () => String(process.env.RAZORPAY_KEY_ID || "").startsWith("rzp_test_");
+
+/* Dodo signs webhooks the Standard Webhooks way: base64 HMAC-SHA256 of "id.timestamp.body" */
+export function webhookOk(secret, id, ts, body, sigHeader) {
+  if (!id || !ts || !sigHeader) return false;
+  if (Math.abs(Date.now() / 1000 - Number(ts)) > 300) return false;           // older than 5 minutes: replay
+  const key = secret.startsWith("whsec_") ? Buffer.from(secret.slice(6), "base64") : Buffer.from(secret);
+  const want = crypto.createHmac("sha256", key).update(id + "." + ts + "." + body).digest("base64");
+  return String(sigHeader).split(" ").some(part => { const [v, sig] = part.split(","); return v === "v1" && safeEqual(sig, want); });
+}
+
+/* is this Dodo payment a paid Window Safar Pass for this account? */
+export function passPaymentFor(pay, uid) {
+  const m = pay.metadata || {};
+  if (m.product !== "window-safar-pass") return "This payment isn't for the Window Safar Pass.";
+  if (uid && m.uid !== uid) return "This payment belongs to a different account.";
+  const cart = pay.product_cart || [];
+  if (cart.length && !cart.some(i => i.product_id === env("DODO_PRODUCT_ID"))) return "This payment is for a different product.";
+  if (pay.status !== "succeeded") return "The payment hasn't gone through yet (status: " + pay.status + ").";
+  return "";
+}
