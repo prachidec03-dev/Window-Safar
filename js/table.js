@@ -19,18 +19,18 @@ function autoSnack(){
 const WIKI={"masala chai":"Masala chai","chai":"Masala chai","cutting chai":"Masala chai","kulhad":"Kulhad","bread pakoda":"Bread pakora","bhajiya":"Pakora",
  "filter coffee":"Indian filter coffee","bajji":"Bajji","darjeeling tea":"Darjeeling tea","momos":"Momo (food)","aloo paratha":"Aloo paratha","poha":"Flattened rice","idli":"Idli",
  "coffee":"Coffee","samosa":"Samosa","bun maska":"Bun maska","vada pav":"Vada pav","masala chana":"Chana masala","thali":"Thali","meals":"Sadhya","thukpa":"Thukpa",
- "tomato soup":"Tomato soup","kachori":"Kachori","aloo tikki":"Aloo tikki","masala maggi":"Maggi","maggi":"Maggi","roasted bhutta":"Corn on the cob","bhel puri":"Bhelpuri","khaman dhokla":"Dhokla","dhokla":"Dhokla","murukku":"Murukku","banana chips":"Banana chip","jhalmuri":"Jhal muri","dal":"Dal","chikki":"Chikki","ice cream":"Kulfi","rice":"Rice","tea":"Masala chai"};
+ "tomato soup":"Tomato soup","kachori":"Kachori","aloo tikki":"Aloo tikki","masala maggi":"Instant noodle","maggi":"Instant noodle","roasted bhutta":"Corn on the cob","bhel puri":"Bhelpuri","khaman dhokla":"Dhokla","dhokla":"Dhokla","murukku":"Murukku","banana chips":"Banana chip","jhalmuri":"Jhal muri","dal":"Dal","chikki":"Chikki","ice cream":"Kulfi","rice":"Rice","tea":"Masala chai"};
 function wikiTitle(name){const k=name.toLowerCase().replace(/\s*\(.*?\)/g,"").replace(/,.*$/,"").trim();if(WIKI[k])return WIKI[k];for(const key of Object.keys(WIKI))if(k.startsWith(key)||k.includes(key))return WIKI[key];return null}
 const photoCache=store.get("ws-photos",{});let photoOK=null;
 /* where the subject sits in each photo, so crops keep the food centred */
 const FOCUS={"01-kulhad-chai":"45% 80%","02-platform-golden-hour":"58% 38%","03-window-fields":"50% 50%","04-friends-jhalmuri":"62% 72%","05-samosa-newspaper":"48% 66%","06-red-coaches-platform":"40% 55%","07-chai-paper-cups-window":"45% 82%","08-jhalmuri-trays":"55% 72%","09-poha-samosa-chai-berth":"45% 74%","10-aloo-paratha":"50% 58%","12-vada-pav":"36% 74%","13-momos-plate":"50% 62%","14-momo-cart-night":"52% 62%","15-veg-thali-trays":"55% 42%"};
 const focusOf=src=>{const m=/photos\/([^.]+)\./.exec(src||"");return m&&FOCUS[m[1]]||"50% 50%"};
-const LOCAL_PHOTO=[["kachori","34-kachori"],["tikki","35-aloo-tikki-chaat"],["maggi","36-maggi"],["bhutta","37-bhutta"],["bhel","38-bhel-puri"],["dhokla","39-dhokla"],["murukku","40-murukku"],["banana chips","41-banana-chips"],["bun maska","16-bun-maska-chai"],["idli","24-idli-vada"],["filter coffee","25-filter-coffee-night"],["bread pakoda","27-bread-pakoda"],["pakoda","27-bread-pakoda"],
+const LOCAL_PHOTO=[["bun maska","16-bun-maska-chai"],["idli","24-idli-vada"],["filter coffee","25-filter-coffee-night"],["bread pakoda","27-bread-pakoda"],["pakoda","27-bread-pakoda"],
  ["masala chana","28-masala-chana"],["bajji","29-bajji-leaf"],["bhajiya","29-bajji-leaf"],["cutting chai","30-chai-rainy-window"],["chikki","31-chikki-jars"],["chips","32-snacks-berth"],["cold drink","32-snacks-berth"],
  ["ice cream","33-ice-cream"],["kulhad","01-kulhad-chai"],["masala chai","01-kulhad-chai"],["tea","20-chai-irctc-cup"],["chai","07-chai-paper-cups-window"],["samosa","05-samosa-newspaper"],["poha","09-poha-samosa-chai-berth"],
  ["paratha","10-aloo-paratha"],["vada pav","12-vada-pav"],["momos","13-momos-plate"],["thukpa","21-thukpa"],["thali","22-veg-thali-box"],["meals","22-veg-thali-box"],["dal","22-veg-thali-box"],
  ["tomato soup","22-veg-thali-box"],["rice","22-veg-thali-box"],["jhalmuri","08-jhalmuri-trays"]];
-function localPhoto(name){const k=name.toLowerCase();
+function localPhoto(name){const k=name.toLowerCase();if(k.includes("banana"))return null;
   if(k.includes("coffee")&&!k.includes("filter"))return{src:"photos/food/"+(route.region==="north"?"26-coffee-desert-window":"17-coffee-irctc-cup")+".jpg",title:"Window Safar"};
   for(const [key,f] of LOCAL_PHOTO)if(k.includes(key))return{src:"photos/food/"+f+".jpg",title:"Window Safar"};return null}
 async function photosFor(names){
